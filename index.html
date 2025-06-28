@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Hockey Yearly Plan & Calendar</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* --- CORE STYLES --- */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #FDFDFD; 
+            color: #4A5568; 
+        }
+        .active-month-btn {
+            background-color: #3E8E7E !important; /* Bright Teal */
+            color: white !important;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        /* --- LIST & ANIMATION STYLES --- */
+        .list-custom li { position: relative; padding-left: 1.5rem; }
+        .list-custom li::before {
+            content: '▹'; position: absolute; left: 0; top: 0.125rem;
+            color: #3E8E7E; font-weight: bold;
+        }
+        .content-fade-in { animation: fadeIn 0.5s ease-in-out; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- DETAILED CALENDAR STYLES (INTEGRATED) --- */
+        .month-title { color: #0A2463; text-align: center; font-size: 1.75rem; font-weight: bold; margin-bottom: 1rem; padding-top: 1.5rem; }
+        .calendar-table { width: 100%; border-collapse: collapse; margin-bottom: 2rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .calendar-table th, .calendar-table td { border: 1px solid #E2E8F0; padding: 0.5rem; text-align: left; font-size: 0.8rem; vertical-align: top; }
+        .calendar-table th { background-color: #F1F5F9; color: #0A2463; font-weight: 600; text-align: center; }
+        .day-cell { min-height: 70px; height: auto; }
+        .day-number { font-weight: bold; color: #0A2463; display: block; margin-bottom: 0.25rem; }
+        .event { display: block; background-color: #E0F2FE; color: #0C4A6E; padding: 0.2rem 0.4rem; border-radius: 0.25rem; font-size: 0.75rem; margin-bottom: 0.2rem; line-height: 1.2; }
+        .event-game { background-color: #F4A261; color: white; }
+        .event-sc { background-color: #A7F3D0; color: #047857; }
+        .event-rest { background-color: #FECACA; color: #B91C1C; }
+        .event-assess { background-color: #BFDBFE; color: #1E40AF; }
+        .event-meeting { background-color: #FEF08A; color: #A16207; }
+        .event-video { background-color: #F3E8FF; color: #6B21A8; border-color: #D8B4FE; }
+        .event-recovery { background-color: #E0F2FE; border-color: #0C4A6E; }
+        .weekend-day { background-color: #FAFAFA; }
+        
+        .legend { display: flex; flex-wrap: wrap; justify-content: center; gap: 1rem; margin-bottom: 1.5rem; padding: 0.75rem; background-color: #F9FAFB; border-radius: 0.5rem; border: 1px solid #E2E8F0;}
+        .legend-item { display: flex; align-items: center; font-size: 0.8rem; }
+        .legend-color-box { width: 1rem; height: 1rem; margin-right: 0.5rem; border-radius: 0.2rem; border: 1px solid rgba(0,0,0,0.1); }
+        
+        /* Tab styling */
+        .active-tab {
+            color: #3E8E7E !important; /* Bright Teal */
+            border-bottom-color: #3E8E7E !important;
+        }
+
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- HEADER -->
+    <header class="bg-[#0A2463] text-white shadow-lg sticky top-0 z-50">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                <h1 class="text-xl sm:text-2xl font-bold">High-Performance Hockey: Yearly Plan</h1>
+                 <a href="https://ccampbell1988.github.io/HP1-Post-Task-Home-Page/" class="hidden sm:inline-block bg-[#3E8E7E] hover:bg-[#2c6b5c] text-white px-4 py-2 rounded-md text-sm font-medium transition-colors">
+                    &larr; Back to Home Page
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT -->
+    <main class="container mx-auto p-4 sm:p-6 lg:p-8">
+
+        <!-- OVERALL PHILOSOPHY SECTION -->
+        <section id="philosophy" class="mb-12">
+            <h2 class="text-3xl font-bold text-[#0A2463] mb-6 text-center">Overall Philosophy</h2>
+            <div class="bg-white p-6 rounded-xl shadow-lg border border-slate-200 max-w-4xl mx-auto">
+                <p class="text-base leading-relaxed text-slate-600">This plan uses a structured approach to build skills, tactics, fitness, mindset, and team chemistry for top performance. It follows Hockey Canada’s Long-Term Player Development model, focusing on players in the later "Train to Train" or "Train to Compete" stages. Key priorities include player health, recovery, long-term growth, and strong habits. The goal is to lead, develop, and promote positive hockey experiences.</p>
+            </div>
+        </section>
+
+        <!-- MONTH NAVIGATION -->
+        <nav id="month-navigation" class="flex justify-center flex-wrap gap-2 mb-8 pt-8 border-t border-slate-200">
+            <!-- Buttons will be injected here by JavaScript -->
+        </nav>
+
+        <!-- LEGEND -->
+        <div class="legend">
+            <div class="legend-item"><span class="legend-color-box event"></span>P: Practice</div>
+            <div class="legend-item"><span class="legend-color-box event-game"></span>G: Game</div>
+            <div class="legend-item"><span class="legend-color-box event-sc"></span>S&C: Strength & Conditioning</div>
+            <div class="legend-item"><span class="legend-color-box event-recovery"></span>Rec: Recovery</div>
+            <div class="legend-item"><span class="legend-color-box event-rest"></span>Rest: Full Rest</div>
+            <div class="legend-item"><span class="legend-color-box event-assess"></span>Assess: Assessment</div>
+            <div class="legend-item"><span class="legend-color-box event-meeting"></span>TM/PM/TB: Meeting/Team Building</div>
+            <div class="legend-item"><span class="legend-color-box event-video"></span>Vid: Video Review</div>
+        </div>
+
+        <!-- DYNAMIC CONTENT AREA -->
+        <!-- This container is now a simple block container, not a grid, to ensure vertical stacking -->
+        <div>
+            <!-- Performance Plan Details -->
+            <div id="performance-plan-content">
+                <!-- Monthly content from HP1 will be injected here -->
+            </div>
+
+            <!-- Interactive Calendar - Added margin-top to create space -->
+            <div id="calendar-container" class="mt-12">
+                <!-- Detailed calendar will be injected here -->
+            </div>
+        </div>
+        
+        <!-- STATIC CONTENT AREA (TOOLS, CONSIDERATIONS, PROGRESS) -->
+        <div class="mt-16">
+            <section id="tools" class="pt-12 mb-12">
+                <h2 class="text-3xl font-bold text-[#0A2463] mb-8 text-center">Key Evaluation & Tracking Tools</h2>
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="bg-white p-6 rounded-xl shadow-lg border border-slate-200">
+                        <h3 class="text-lg font-semibold text-[#0A2463] mb-3">Assessment & Planning</h3>
+                        <ul class="list-custom pl-5 space-y-2 text-sm">
+                            <li><strong>Hockey Canada Player Assessment Plans & Tracking Sheet:</strong> Standardized drills and rating scales for tryouts and in-season technical/tactical assessment.</li>
+                            <li><strong>Personal Development Plan (PDP):</strong> Comprehensive tool for goal setting (SMARTER) and tracking across Hockey, Academics, S&C, Intangibles/Leadership, Mental Performance, Life.</li>
+                            <li><strong>Self-Evaluation Radar:</strong> Visual tool for players to self-assess across Mental, Tactical, Physical, and Emotional sectors.</li>
+                        </ul>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-lg border border-slate-200">
+                        <h3 class="text-lg font-semibold text-[#0A2463] mb-3">Performance & Management</h3>
+                        <ul class="list-custom pl-5 space-y-2 text-sm">
+                            <li><strong>S&C Communication Loop & Monthly Workload Plan:</strong> Essential for managing physical load and optimizing off-ice training.</li>
+                            <li><strong>Video Analysis:</strong> For technical correction, tactical understanding, and providing player feedback.</li>
+                            <li><strong>Game Cards:</strong> For in-game tracking of lines, special teams, and key observations.</li>
+                        </ul>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-lg border border-slate-200">
+                        <h3 class="text-lg font-semibold text-[#0A2463] mb-3">Development Frameworks</h3>
+                        <ul class="list-custom pl-5 space-y-2 text-sm">
+                            <li><strong>Team Building Framework:</strong> Using Tuckman's stages to guide activities for social and task cohesion throughout the season.</li>
+                            <li><strong>Mental Skills Implementation Strategies:</strong> Specific techniques for goal setting, emotional control, imagery, self-talk, and deliberate practice, tailored for Gen Z.</li>
+                        </ul>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-lg border border-slate-200">
+                        <h3 class="text-lg font-semibold text-[#0A2463] mb-3">Culture & Habits</h3>
+                        <ul class="list-custom pl-5 space-y-2 text-sm">
+                            <li><strong>Leadership Principles:</strong> Framework for coaches to build connection, motivate, partner with, and care for players to foster leadership.</li>
+                            <li><strong>Habit Formation & Tracking:</strong> Identifying and reinforcing key on-ice ("Canadian Way") and off-ice (preparation, recovery) habits.</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section id="considerations" class="pt-12 mb-12">
+                <h2 class="text-3xl font-bold text-[#0A2463] mb-8 text-center">Important Considerations</h2>
+                <div>
+                    <div class="border-b border-slate-300 mb-6">
+                        <nav class="-mb-px flex justify-center space-x-4 sm:space-x-8" aria-label="Tabs">
+                            <button class="tab-button active-tab whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm text-slate-600 hover:text-[#3E8E7E] border-transparent hover:border-[#3E8E7E]" data-tab="individualization">Individualization</button>
+                            <button class="tab-button whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm text-slate-600 hover:text-[#3E8E7E] border-transparent hover:border-[#3E8E7E]" data-tab="flexibility">Flexibility</button>
+                            <button class="tab-button whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm text-slate-600 hover:text-[#3E8E7E] border-transparent hover:border-[#3E8E7E]" data-tab="communication">Communication</button>
+                            <button class="tab-button whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm text-slate-600 hover:text-[#3E8E7E] border-transparent hover:border-[#3E8E7E]" data-tab="recovery">Recovery</button>
+                            <button class="tab-button whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm text-slate-600 hover:text-[#3E8E7E] border-transparent hover:border-[#3E8E7E]" data-tab="environment">Environment</button>
+                            <button class="tab-button whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm text-slate-600 hover:text-[#3E8E7E] border-transparent hover:border-[#3E8E7E]" data-tab="ltpd">LTPD Alignment</button>
+                        </nav>
+                    </div>
+                    <div id="tab-content" class="space-y-6">
+                        <div id="individualization-content" class="tab-pane bg-white p-6 rounded-xl shadow-lg border border-slate-200">
+                            <h3 class="text-lg font-semibold text-[#0A2463] mb-2">Individualization</h3>
+                            <p class="text-sm">Adapt approaches for individual player needs, leveraging PDPs. Recognize that each athlete learns and develops differently, requiring personalized coaching and support to maximize their potential.</p>
+                        </div>
+                        <div id="flexibility-content" class="tab-pane hidden bg-white p-6 rounded-xl shadow-lg border border-slate-200">
+                            <h3 class="text-lg font-semibold text-[#0A2463] mb-2">Flexibility</h3>
+                            <p class="text-sm">This plan is a template; adjust based on team progress, injuries, schedule, and unforeseen circumstances. A rigid plan can hinder development; adaptability is key to navigating a long season successfully.</p>
+                        </div>
+                        <div id="communication-content" class="tab-pane hidden bg-white p-6 rounded-xl shadow-lg border border-slate-200">
+                            <h3 class="text-lg font-semibold text-[#0A2463] mb-2">Communication</h3>
+                            <p class="text-sm">Open, consistent, clear, brief, and positive communication is paramount between all stakeholders (players, coaches, parents, S&C staff). Effective communication builds trust and ensures everyone is aligned.</p>
+                        </div>
+                        <div id="recovery-content" class="tab-pane hidden bg-white p-6 rounded-xl shadow-lg border border-slate-200">
+                            <h3 class="text-lg font-semibold text-[#0A2463] mb-2">Recovery</h3>
+                            <p class="text-sm">A critical component for sustained performance and injury prevention. Emphasize sleep, nutrition, hydration, and active recovery strategies throughout the season.</p>
+                        </div>
+                        <div id="environment-content" class="tab-pane hidden bg-white p-6 rounded-xl shadow-lg border border-slate-200">
+                            <h3 class="text-lg font-semibold text-[#0A2463] mb-2">Enjoyment & Positive Environment</h3>
+                            <p class="text-sm">Foster a supportive, respectful, and enjoyable atmosphere to enhance motivation, learning, and team cohesion, especially crucial for Gen Z athletes. Positive experiences contribute to long-term love of the game.</p>
+                        </div>
+                        <div id="ltpd-content" class="tab-pane hidden bg-white p-6 rounded-xl shadow-lg border border-slate-200">
+                            <h3 class="text-lg font-semibold text-[#0A2463] mb-2">LTPD Alignment</h3>
+                            <p class="text-sm">Ensure all training, competition, and recovery demands are appropriate for the athletes' developmental stage according to Hockey Canada's Long-Term Player Development model. This promotes holistic development and reduces burnout.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="progress" class="pt-12 mb-12">
+                <h2 class="text-3xl font-bold text-[#0A2463] mb-8 text-center">Progress Tracking (Sample)</h2>
+                <div class="bg-white p-6 rounded-xl shadow-lg border border-slate-200">
+                    <div class="mb-6">
+                        <label for="player-select" class="block text-sm font-medium text-[#0A2463] mb-1">Select Player/View:</label>
+                        <select id="player-select" class="block w-full max-w-xs p-2 border border-slate-300 rounded-md shadow-sm focus:ring-[#3E8E7E] focus:border-[#3E8E7E] sm:text-sm">
+                            <option value="playerA">Player A</option>
+                            <option value="playerB">Player B</option>
+                            <option value="teamAverage">Team Average</option>
+                        </select>
+                    </div>
+                    <div class="chart-container relative w-full max-w-xl mx-auto h-80 sm:h-96">
+                        <canvas id="progressRadarChart"></canvas>
+                    </div>
+                </div>
+                <div class="mt-8 grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div class="bg-white p-6 rounded-xl shadow-lg border border-slate-200">
+                        <h3 class="text-lg font-semibold text-[#0A2463] mb-2">Skill Development</h3>
+                        <p class="text-sm">Tracking improvements in core technical skills (skating, puck handling, shooting, passing) through targeted drills and game application.</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-lg border border-slate-200">
+                        <h3 class="text-lg font-semibold text-[#0A2463] mb-2">Physical Conditioning</h3>
+                        <p class="text-sm">Monitoring strength, speed, agility, and endurance gains based on S&C program adherence and on-ice performance metrics.</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-lg border border-slate-200">
+                        <h3 class="text-lg font-semibold text-[#0A2463] mb-2">Tactical Understanding</h3>
+                        <p class="text-sm">Assessing growth in game sense, positional play, system comprehension, and decision-making in various game situations.</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-lg border border-slate-200">
+                        <h3 class="text-lg font-semibold text-[#0A2463] mb-2">Mental Fortitude</h3>
+                        <p class="text-sm">Observing development in focus, resilience, coachability, leadership, and overall contribution to team culture and performance.</p>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+    
+    <!-- FOOTER -->
+    <footer class="bg-[#0A2463] text-white text-center p-6 mt-12">
+        <p class="text-sm">&copy; <span id="currentYear"></span> High-Performance Hockey Plan. All Rights Reserved.</p>
+    </footer>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+
+        // --- DATA OBJECTS ---
+
+        // Data for the Left Column (Performance Plan)
+        const performanceData = {
+            "September": `
+                <div class="bg-white p-6 rounded-xl shadow-lg border border-slate-200 content-fade-in">
+                    <h3 class="text-xl font-semibold text-[#0A2463] mb-1">SEPTEMBER: Foundation & Formation</h3>
+                    <p class="text-sm text-[#F4A261] font-medium mb-3">(Pre-Season/Early Season) - "Forming" Stage</p>
+                    <h4 class="text-md font-semibold text-[#0A2463] mt-3 mb-1">Overall Goals & Objectives:</h4>
+                    <ul class="list-custom pl-5 space-y-1 text-sm">
+                        <li>Establish team identity, culture (vision, core values, norms), and expectations aligned with the "Canadian Way Principles".</li>
+                        <li>Finalize player evaluations and team selection based on a comprehensive assessment of Talent, Character, Competitiveness, and Expectations.</li>
+                        <li>Develop a strong aerobic base and foundational strength, guided by S&C coach collaboration.</li>
+                        <li>Introduce core team systems (offensive, defensive, special teams).</li>
+                        <li>Foster initial team cohesion ("Forming" stage) and open communication channels, adapting to Gen Z athlete needs.</li>
+                        <li>Introduce the concept of "High Performance Habits" and Personal Development Plans (PDPs).</li>
+                    </ul>
+                    <h4 class="text-md font-semibold text-[#0A2463] mt-3 mb-1">Player Selection / Tryouts (Weeks 1-3):</h4>
+                    <p class="text-xs text-slate-500 mb-1"><strong>Process:</strong> Minimum of four prep skates/skill sessions prior to formal evaluations. Formal evaluations to include a minimum of one skills session, one small-area games session, and one formal game.</p>
+                    <p class="text-xs text-slate-500 mb-1"><strong>Focus:</strong> Technical, Tactical (Hockey Sense), Physical, Mental/Character.</p>
+                     <details class="text-sm mt-2">
+                        <summary class="text-[#3E8E7E] cursor-pointer hover:underline">Show Full Tryout & Other September Details...</summary>
+                        <div class="mt-2 p-4 bg-slate-50 rounded-md space-y-2 text-xs">
+                            <p><strong>Technical Focus During Tryouts:</strong> Skating (agility, speed, transitions), Puck Skills (control, protection, creativity), Passing (accuracy, reception), Shooting (quick release, accuracy), Defensive Skills (angling, stick positioning, 1v1) – using drills from "Player Assessment Plan #1".</p>
+                            <p><strong>Tactical (Hockey Sense) Focus During Tryouts:</strong> Decision-making in SAGs and scrimmages, reading play, positional understanding.</p>
+                            <p><strong>Physical Focus During Tryouts:</strong> On-ice compete level, work rate. Off-ice baseline fitness testing (e.g., Standing Long Jump, 40m sprint, Pull-ups, Beep Test, Pro-Agility).</p>
+                            <p><strong>Mental/Character Focus During Tryouts:</strong> Coachability, response to adversity, work ethic, team-first attitude, "Canadian Way Principles" (e.g., win battles, stop on pucks, manage pucks).</p>
+                            <p><strong>Evaluation Tools:</strong> Hockey Canada Player Evaluation Sheet (1-4 scale), detailed KEPs for drills.</p>
+                            <p><strong>Communication (Tryouts):</strong> Clear criteria communicated pre-tryout. Post-tryout, individual meetings to discuss roles, expectations, and PDP initiation. For those not selected, provide constructive feedback where possible.</p>
+                            <p><strong>Practices / Games:</strong> Practices: 4-5 on-ice sessions/week (90-120 min). High volume, moderate-high intensity. Emphasis on skill repetition (Wooden's 8 Laws of Learning), conditioning, and introducing basic tactical concepts (forecheck, DZC, NZ regroup, basic PP/PK structures). Integrate "Practice with Purpose and Speed" and "Figure It Out (F.I.O)" philosophies. Games: 2-3 exhibition games. Focus on implementing basic systems, evaluating game application, and building chemistry.</p>
+                            <p><strong>Technical / Tactical / Team Play Development:</strong> Technical: Focus on foundational skills from National Team Technical Curriculum. Drills from "Player Assessment Plan #1" are key. Tactical: Introduction to team systems. Initial video sessions to introduce concepts. Team Play: Begin establishing on-ice communication. Use drills to develop initial linemate chemistry. Introduce "Championship Habits".</p>
+                            <p><strong>Physical Performance:</strong> Off-Ice (3-4 sessions/week - S&C Coach Led): Focus: Aerobic base, foundational strength, core, mobility. Communication: Head coach updates S&C coach on player fatigue/soreness and any on-ice physical deficiencies observed. On-Ice: Conditioning integrated into drills. Nutrition & Hydration: Education on fueling and recovery.</p>
+                            <p><strong>Mental Performance:</strong> Introduction to mental skills for Gen Z: Goal Setting (SMART Process Goals), Focus/Concentration (WIN), Resilience (growth mindset), Communication (clear, brief, consistent). Establish pre-practice/pre-game routines.</p>
+                            <p><strong>Team Development:</strong> Forming Stage: Team meetings to define team vision, core values, rules, expectations, and season goals. Activities: Icebreakers, defining team identity, introduction of leadership group. Introduce Personal Development Plans (PDPs).</p>
+                        </div>
+                    </details>
+                </div>`,
+            "October": `
+                <div class="bg-white p-6 rounded-xl shadow-lg border border-slate-200 content-fade-in">
+                    <h3 class="text-xl font-semibold text-[#0A2463] mb-1">OCTOBER: System Implementation & Early Competition</h3>
+                    <p class="text-sm text-[#F4A261] font-medium mb-3">(Regular Season) - "Storming/Norming" Stage</p>
+                    <h4 class="text-md font-semibold text-[#0A2463] mt-3 mb-1">Overall Goals & Objectives:</h4>
+                    <ul class="list-custom pl-5 space-y-1 text-sm">
+                        <li>Refine and solidify team systems in competitive situations.</li>
+                        <li>Improve consistency in execution of technical skills and "Canadian Way Habits."</li>
+                        <li>Develop game-specific fitness and maintain strength, managing load with S&C coach.</li>
+                        <li>Enhance team cohesion ("Storming" into "Norming" stage) and problem-solving.</li>
+                        <li>Begin tracking performance metrics (technical, tactical, physical, mental) via PDPs and other tools.</li>
+                    </ul>
+                     <details class="text-sm mt-2">
+                        <summary class="text-[#3E8E7E] cursor-pointer hover:underline">Show Full October Details...</summary>
+                        <div class="mt-2 p-4 bg-slate-50 rounded-md space-y-2 text-xs">
+                            <p><strong>Player Evaluation:</strong> Ongoing evaluation in practices/games against established criteria. Individual meetings to provide feedback (PDP review) and adjust roles.</p>
+                            <p><strong>Practices / Games:</strong> Practices: 3-4 on-ice sessions/week (75-90 min). Reduced volume, increased intensity, game-specific scenarios. Focus on tactical execution, special teams, correcting errors (video-informed). Games: 1-2 league games/week. Focus on applying systems, competing, adapting.</p>
+                            <p><strong>Technical / Tactical / Team Play Development:</strong> Technical: Refinement of core skills at speed and under pressure. Position-specific skill development. Tactical: Deeper understanding of systems. Introduce variations (PP breakouts, PK pressure). Focus on transitions. Heavy use of video analysis (team and individual clips). Team Play: Improving on-ice communication, support, anticipation. Executing set plays. Reinforce "Championship Habits."</p>
+                            <p><strong>Physical Performance:</strong> Off-Ice (2-3 sessions/week - S&C Coach Led): Maintain strength/power, speed/agility, core/mobility. Adjust volume based on game load. Emphasize recovery strategies (sleep, nutrition, hydration). Communication: Regular updates to S&C coach on game intensity, player fatigue. On-Ice: Game-intensity drills, SAGs. Monitor player load.</p>
+                            <p><strong>Mental Performance:</strong> Focus/Concentration: Techniques for full game duration. Imagery/Visualization: Introduce basic visualization (successful plays). Emotional Control: Strategies for managing pressure (breathing techniques, mental anchors). Confidence: Build self-confidence and trust in teammates. Reinforce understanding of roles and their value ("4 Wheel Drive Jeep" concept). Gen Z: Continue brief, clear communication. Focus on process in feedback.</p>
+                            <p><strong>Team Development:</strong> Storming/Norming: Address conflicts constructively. Establish clear norms. Activities: Regular team meetings (discuss progress, challenges, opponents), player-led activities (e.g., warm-ups), line/pair meetings, cooperation tasks. Reinforce team culture and values. Review PDP goals. Encourage player leadership.</p>
+                        </div>
+                    </details>
+                </div>`,
+            "November": `
+                <div class="bg-white p-6 rounded-xl shadow-lg border border-slate-200 content-fade-in">
+                    <h3 class="text-xl font-semibold text-[#0A2463] mb-1">NOVEMBER: Refinement & Adaptation</h3>
+                    <p class="text-sm text-[#F4A261] font-medium mb-3">(Regular Season) - "Norming/Performing" Stage</p>
+                    <h4 class="text-md font-semibold text-[#0A2463] mt-3 mb-1">Overall Goals & Objectives:</h4>
+                    <ul class="list-custom pl-5 space-y-1 text-sm">
+                        <li>Achieve higher consistency in team performance and "Canadian Way Habits."</li>
+                        <li>Adapt tactical approaches based on opponents.</li>
+                        <li>Maintain physical fitness and minimize injury risk through S&C collaboration.</li>
+                        <li>Strengthen mental toughness, resilience, and emotional control.</li>
+                        <li>Further develop leadership within the team.</li>
+                    </ul>
+                    <details class="text-sm mt-2">
+                        <summary class="text-[#3E8E7E] cursor-pointer hover:underline">Show Full November Details...</summary>
+                        <div class="mt-2 p-4 bg-slate-50 rounded-md space-y-2 text-xs">
+                            <p><strong>Player Evaluation:</strong> Continuous performance monitoring. PDP check-ins.</p>
+                            <p><strong>Practices / Games:</strong> Practices: 3 on-ice sessions/week (75-90 min). High-intensity, game-like drills, special teams refinement, address weaknesses. Introduce new wrinkles/adjustments to systems. Games: 1-2 league games/week. Focus on executing game plans, in-game adjustments.</p>
+                            <p><strong>Technical / Tactical / Team Play Development:</strong> Technical: Mastery of core skills under pressure. Advanced techniques (deceptive shooting, puck protection). Tactical: Advanced understanding of systems, adjustments. Develop "Hockey IQ" (reading play, anticipation). Strategies for key situations (5v6, 6v5). Increased video for pre-scouting. Team Play: Seamless execution. Stronger unit cohesion. Effective communication and problem-solving on bench/ice.</p>
+                            <p><strong>Physical Performance:</strong> Off-Ice (2-3 sessions/week - S&C Coach Led): Power development (plyos, Olympic lifts if appropriate), maintain strength, speed, agility, recovery. Individualized adjustments. Communication: Discuss specific player needs (e.g., "getting knocked off pucks too easily") with S&C coach for targeted interventions. On-Ice: Drills emphasizing quickness, reaction, sustained high-intensity. Proactive injury prevention.</p>
+                            <p><strong>Mental Performance:</strong> Emotional Control: Composure in high-stakes situations. Self-Talk: Develop effective positive self-talk and thought-stopping. Coping Strategies: For setbacks and adversity (embrace failure, learn from it – "Black Box Thinking" concept). Motivation: Maintain focus through the grind. Gen Z: Personalize and customize approaches to build confidence. Help them discover meaning in their roles.</p>
+                            <p><strong>Team Development:</strong> Norming/Performing: Solidify roles and norms. Enhance trust and collaboration. Activities: Leadership development workshops/discussions (e.g., what makes a good leader, player-led standards meetings), review/adjust team goals, activities for morale. Encourage peer accountability.</p>
+                        </div>
+                    </details>
+                </div>`,
+            "December": `
+                 <div class="bg-white p-6 rounded-xl shadow-lg border border-slate-200 content-fade-in">
+                    <h3 class="text-xl font-semibold text-[#0A2463] mb-1">DECEMBER: Sustaining Performance & Managing Load</h3>
+                    <p class="text-sm text-[#F4A261] font-medium mb-3">(Regular Season)</p>
+                    <h4 class="text-md font-semibold text-[#0A2463] mt-3 mb-1">Overall Goals & Objectives:</h4>
+                    <ul class="list-custom pl-5 space-y-1 text-sm">
+                        <li>Maintain high performance leading into holiday break.</li>
+                        <li>Effectively manage player workload and fatigue (critical communication with S&C coach).</li>
+                        <li>Fine-tune strategies. Reinforce mental skills and team unity.</li>
+                    </ul>
+                     <details class="text-sm mt-2">
+                        <summary class="text-[#3E8E7E] cursor-pointer hover:underline">Show Full December Details...</summary>
+                        <div class="mt-2 p-4 bg-slate-50 rounded-md space-y-2 text-xs">
+                            <p><strong>Player Evaluation:</strong> Performance reviews and PDP check-ins before break.</p>
+                            <p><strong>Practices / Games:</strong> Practices: 2-3 on-ice sessions/week (60-75 min). Reduced volume, maintain intensity. Sharp execution, special teams, tactical refreshers. More recovery-focused towards break. Games: 1-2 league games/week. Focus on consistent execution, managing energy.</p>
+                            <p><strong>Technical / Tactical / Team Play Development:</strong> Technical: Maintain skill sharpness. Efficiency of movement/decision-making. Tactical: Review/reinforce systems. Analyze opponent trends. Team Play: Maintain strong communication/cohesion. Role clarity.</p>
+                            <p><strong>Physical Performance:</strong> Off-Ice (2 sessions/week - S&C Coach Led): Maintenance of strength/power. Increased emphasis on active recovery, mobility, flexibility. Monitor for overtraining. Guidance on staying active during break. On-Ice: Shorter, sharper practices. Nutrition: Education on managing diet during holidays.</p>
+                            <p><strong>Mental Performance:</strong> Strategies for staying focused/motivated during distractions. Revisit goals. Stress management. Gratitude/reflection. Gen Z: Provide reassurance and trust. Reinforce belonging cues.</p>
+                            <p><strong>Team Development:</strong> Performing Stage: Team activities to celebrate first half, build camaraderie. Clear communication for break/return. Focus on "Championship Habits".</p>
+                        </div>
+                    </details>
+                </div>`,
+            "January": `
+                 <div class="bg-white p-6 rounded-xl shadow-lg border border-slate-200 content-fade-in">
+                    <h3 class="text-xl font-semibold text-[#0A2463] mb-1">JANUARY: Ramping Up & Playoff Preparation</h3>
+                    <p class="text-sm text-[#F4A261] font-medium mb-3">(Regular Season) - "Performing" Stage</p>
+                    <h4 class="text-md font-semibold text-[#0A2463] mt-3 mb-1">Overall Goals & Objectives:</h4>
+                    <ul class="list-custom pl-5 space-y-1 text-sm">
+                        <li>Regain peak condition. Elevate intensity/focus for playoff push.</li>
+                        <li>Refine all aspects of team play to high execution level. Build momentum.</li>
+                        <li>Solidify playoff positioning.</li>
+                    </ul>
+                     <details class="text-sm mt-2">
+                        <summary class="text-[#3E8E7E] cursor-pointer hover:underline">Show Full January Details...</summary>
+                        <div class="mt-2 p-4 bg-slate-50 rounded-md space-y-2 text-xs">
+                            <p><strong>Player Evaluation:</strong> N/A for selection. Focus on optimizing current roster and individual contributions to team success. PDPs are key.</p>
+                            <p><strong>Practices / Games:</strong> Practices: 3-4 on-ice sessions/week (75-90 min). Increased intensity/competitiveness. Focus on high-pressure situations, special teams excellence, playoff-style hockey. Games: 1-2 critical league games/week. Focus on winning key matchups.</p>
+                            <p><strong>Technical / Tactical / Team Play Development:</strong> Technical: Skills sharp, consistent, precise under pressure. "Game-breaking" skills. Tactical: Mastery of systems, rapid in-game adjustments. Detailed pre-scouting, specific game plans. Practicing scenarios (protecting lead, tying game). Team Play: Peak cohesion. Exceptional communication, trust, anticipation. Flawless execution of complex plays.</p>
+                            <p><strong>Physical Performance:</strong> Off-Ice (2-3 sessions/week - S&C Coach Led): Maintain peak power/strength. Emphasis on speed, agility, explosive movements. Diligent recovery. Communication: S&C coach adapts plan for "Preparation for Playoffs" phase. On-Ice: High-tempo practices simulating playoff intensity. Injury Management: Quick, effective management.</p>
+                            <p><strong>Mental Performance:</strong> Develop "Playoff Mindset": heightened focus, resilience, determination. Advanced visualization for critical moments. Strategies for increased pressure. Composure/discipline in emotionally charged games. "Deliberate Practice" of mental skills.</p>
+                            <p><strong>Team Development:</strong> Performing Stage: Reinforce team identity and belief. Leadership stepping up. Strong sense of urgency/commitment. Final push team-building/motivational sessions. Connect to team vision and values.</p>
+                        </div>
+                    </details>
+                </div>`,
+            "February": `
+                 <div class="bg-white p-6 rounded-xl shadow-lg border border-slate-200 content-fade-in">
+                    <h3 class="text-xl font-semibold text-[#0A2463] mb-1">FEBRUARY: Peaking & Playoff Mindset</h3>
+                    <p class="text-sm text-[#F4A261] font-medium mb-3">(Late Regular Season / Early Playoffs) - Peak "Performing"</p>
+                    <h4 class="text-md font-semibold text-[#0A2463] mt-3 mb-1">Overall Goals & Objectives:</h4>
+                    <ul class="list-custom pl-5 space-y-1 text-sm">
+                        <li>Achieve peak team performance. Secure best playoff seeding or begin playoffs.</li>
+                        <li>Fine-tune all elements for playoff intensity. Ensure all players physically/mentally prepared.</li>
+                        <li>Foster unwavering belief.</li>
+                    </ul>
+                     <details class="text-sm mt-2">
+                        <summary class="text-[#3E8E7E] cursor-pointer hover:underline">Show Full February Details...</summary>
+                        <div class="mt-2 p-4 bg-slate-50 rounded-md space-y-2 text-xs">
+                            <p><strong>Player Evaluation:</strong> Focus on role execution and contribution to team success.</p>
+                            <p><strong>Practices / Games:</strong> Practices: 2-3 on-ice sessions/week (60-75 min). High intensity, shorter duration. Opponent prep, special teams, sharpness. "Quality over quantity". Games: Crucial late-season or early playoff rounds. Focus on precise execution, adapting, winning.</p>
+                            <p><strong>Technical / Tactical / Team Play Development:</strong> Technical: Flawless execution under extreme pressure. Minimize errors. Tactical: Deep understanding of opponent tendencies, tailored game plans. Execute multiple strategies, adjust on the fly. Mastery of situational play. Use of timeouts effectively. Team Play: Ultimate synergy/trust. Unselfish play. Resilience.</p>
+                            <p><strong>Physical Performance:</strong> Off-Ice (1-2 sessions/week - S&C Coach Led): Primarily recovery, mobility, maintaining power/speed. Very short, sharp workouts. Individualized. Strict adherence to nutrition, hydration, sleep. On-Ice: Short, intense, focused practices. Prioritize rest/recovery.</p>
+                            <p><strong>Mental Performance:</strong> Peak mental toughness: perform under max pressure, bounce back. Strong belief/confidence. Effective arousal regulation. "One shift, one period, one game at a time" mentality. Gen Z: Continued positive reinforcement, focus on their contributions and value.</p>
+                            <p><strong>Team Development:</strong> Peak Performing: Strong leadership (coach and player). Reinforce the "why." Positive, supportive, determined environment. "The time is now - not the past".</p>
+                        </div>
+                    </details>
+                </div>`,
+            "March": `
+                 <div class="bg-white p-6 rounded-xl shadow-lg border border-slate-200 content-fade-in">
+                    <h3 class="text-xl font-semibold text-[#0A2463] mb-1">MARCH: Championship Phase</h3>
+                    <p class="text-sm text-[#F4A261] font-medium mb-3">(Playoffs) - "Performing/Adjourning"</p>
+                    <h4 class="text-md font-semibold text-[#0A2463] mt-3 mb-1">Overall Goals & Objectives:</h4>
+                    <ul class="list-custom pl-5 space-y-1 text-sm">
+                        <li>Win championships. Perform at absolute peak.</li>
+                        <li>Demonstrate resilience, adaptability, composure under highest pressure. Leave everything on the ice.</li>
+                    </ul>
+                     <details class="text-sm mt-2">
+                        <summary class="text-[#3E8E7E] cursor-pointer hover:underline">Show Full March Details...</summary>
+                        <div class="mt-2 p-4 bg-slate-50 rounded-md space-y-2 text-xs">
+                            <p><strong>Player Evaluation:</strong> N/A for selection.</p>
+                            <p><strong>Practices / Games:</strong> Practices: 1-2 on-ice sessions/week (45-60 min) or as needed. Highly opponent-specific. Tactical walkthroughs, special teams adjustments, maintain sharpness/energy. Emphasis on rest/recovery. Games: Playoff series. Focus: Winning.</p>
+                            <p><strong>Technical / Tactical / Team Play Development:</strong> Technical: Consistent, error-free execution. Making right play at right time. Tactical: Brilliant execution of game plans. Exploit opponent weaknesses. Swift, effective in-game adjustments. Team Play: Unified, synchronized effort. Sacrifice for team. Exceptional resilience.</p>
+                            <p><strong>Physical Performance:</strong> Off-Ice (S&C Coach Led): Almost entirely recovery: active recovery, stretching, massage, nutrition, hydration, sleep. Brief, light activation workouts. Manage fatigue/injuries. On-Ice: Conserve energy, maintain peak readiness.</p>
+                            <p><strong>Mental Performance:</strong> Unshakeable confidence/belief. Laser focus. Thrive under pressure. Emotional control. Draw on all mental skills training. For Gen Z, reinforce their journey and growth.</p>
+                            <p><strong>Team Development:</strong> Performing/Adjourning: Culmination of team building. Strong, unified leadership. Every player embraces role. Post-Season (Adjourning): Debrief, celebrate successes (team & individual using PDPs), plan for off-season. Manage emotions of season ending.</p>
+                        </div>
+                    </details>
+                </div>`
+        };
+
+        // Data for the Right Column (Detailed Calendar View)
+        const calendarData = {
+            "September": `
+                <div class="content-fade-in">
+                    <h2 class="month-title">September 2025: Early Season & Routine Establishment</h2>
+                    <table class="calendar-table">
+                        <thead><tr><th>Sun</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th></tr></thead>
+                        <tbody>
+                            <tr>
+                                <td></td>
+                                <td class="day-cell"><span class="day-number">1</span><span class="event event-sc">S&C-Phase 1</span><span class="event event-video">Vid-Opponent Preview</span></td>
+                                <td class="day-cell"><span class="day-number">2</span><span class="event">P-Game Plan (75 min)</span></td>
+                                <td class="day-cell"><span class="day-number">3</span><span class="event">P-Pre-Game (Light - 45 min)</span><span class="event event-sc">S&C-Activation</span></td>
+                                <td class="day-cell"><span class="day-number">4</span><span class="event event-game">Season Opener Game 1</span></td>
+                                <td class="day-cell"><span class="day-number">5</span><span class="event event-recovery">Rec (Active/Pool)</span><span class="event event-video">Vid-Game 1</span></td>
+                                <td class="day-cell weekend-day"><span class="day-number">6</span><span class="event event-game">Game 2</span></td>
+                            </tr>
+                            <tr>
+                                <td class="day-cell weekend-day"><span class="day-number">7</span><span class="event event-rest">Rest</span></td>
+                                <td class="day-cell"><span class="day-number">8</span><span class="event">P-Corrections/Skills (75 min)</span><span class="event event-sc">S&C-Strength Maintenance</span></td>
+                                <td class="day-cell"><span class="day-number">9</span><span class="event">P-Tactics/Compete (90 min)</span><span class="event event-video">Vid-Weekly Review</span><span class="event event-meeting">TB: Communication Workshop</span></td>
+                                <td class="day-cell"><span class="day-number">10</span><span class="event">P-Special Teams (75 min)</span><span class="event event-sc">S&C-Power/Speed</span></td>
+                                <td class="day-cell"><span class="day-number">11</span><span class="event">P-Game Prep (60 min)</span></td>
+                                <td class="day-cell"><span class="day-number">12</span><span class="event event-game">Game 3</span></td>
+                                <td class="day-cell weekend-day"><span class="day-number">13</span><span class="event">Travel</span><span class="event event-recovery">Rec</span></td>
+                            </tr>
+                            <tr>
+                                <td class="day-cell weekend-day"><span class="day-number">14</span><span class="event event-game">Game 4</span></td>
+                                <td class="day-cell"><span class="day-number">15</span><span class="event event-recovery">Rec (Light Skate - 30 min)</span><span class="event event-video">Vid-Weekend Games</span><span class="event event-sc">S&C-Strength Maintenance</span></td>
+                                <td class="day-cell"><span class="day-number">16</span><span class="event">P-Skills & Puck Protection (75 min)</span></td>
+                                <td class="day-cell"><span class="day-number">17</span><span class="event">P-Team Play (90 min)</span><span class="event event-sc">S&C-Power/Speed</span></td>
+                                <td class="day-cell"><span class="day-number">18</span><span class="event">P-Game Prep (60 min)</span><span class="event event-meeting">TM-Culture/Standards Review</span></td>
+                                <td class="day-cell"><span class="day-number">19</span><span class="event event-game">Game 5</span></td>
+                                <td class="day-cell weekend-day"><span class="day-number">20</span><span class="event event-game">Game 6</span></td>
+                            </tr>
+                            <tr>
+                                <td class="day-cell weekend-day"><span class="day-number">21</span><span class="event event-rest">Rest</span></td>
+                                <td class="day-cell"><span class="day-number">22</span><span class="event">P-Small Area Games (75 min)</span><span class="event event-sc">S&C-Strength Maintenance</span><span class="event event-assess">Assess-Wellness Check</span></td>
+                                <td class="day-cell"><span class="day-number">23</span><span class="event">P-Defensive Zone Coverage (75 min)</span><span class="event event-video">Vid-Defensive Clips</span><span class="event event-meeting">TB: Team Problem-Solving</span></td>
+                                <td class="day-cell"><span class="day-number">24</span><span class="event">P-Offensive Zone Plays (75 min)</span><span class="event event-sc">S&C-Power/Speed</span></td>
+                                <td class="day-cell"><span class="day-number">25</span><span class="event">P-Game Prep (60 min)</span></td>
+                                <td class="day-cell"><span class="day-number">26</span><span class="event event-game">Game 7</span></td>
+                                <td class="day-cell weekend-day"><span class="day-number">27</span><span class="event">Travel</span><span class="event event-recovery">Rec</span></td>
+                            </tr>
+                            <tr>
+                                <td class="day-cell weekend-day"><span class="day-number">28</span><span class="event event-game">Game 8</span></td>
+                                <td class="day-cell"><span class="day-number">29</span><span class="event event-recovery">Rec (Active)</span><span class="event event-video">Vid-Weekend Review</span><span class="event event-sc">S&C-Strength Maintenance</span></td>
+                                <td class="day-cell"><span class="day-number">30</span><span class="event">P-Transition Play (75 min)</span></td>
+                                <td></td><td></td><td></td><td></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>`,
+            "October": `
+                <div class="content-fade-in">
+                    <h2 class="month-title">October 2025: Mid-Season Competitive Phase</h2>
+                    <table class="calendar-table">
+                        <thead><tr><th>Sun</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th></tr></thead>
+                        <tbody>
+                            <tr><td></td><td></td><td></td>
+                                <td class="day-cell"><span class="day-number">1</span><span class="event">P-Battle Drills (75 min)</span><span class="event event-sc">S&C-Power/Speed</span></td>
+                                <td class="day-cell"><span class="day-number">2</span><span class="event">P-Game Prep (60 min)</span></td>
+                                <td class="day-cell"><span class="day-number">3</span><span class="event event-game">Game 9</span></td>
+                                <td class="day-cell weekend-day"><span class="day-number">4</span><span class="event event-game">Game 10</span></td>
+                            </tr>
+                            <tr>
+                                <td class="day-cell weekend-day"><span class="day-number">5</span><span class="event event-rest">Rest</span></td>
+                                <td class="day-cell"><span class="day-number">6</span><span class="event">P-Skills Refinement (75 min)</span><span class="event event-sc">S&C-Strength Maint.</span><span class="event event-video">Vid-Individual Clips</span></td>
+                                <td class="day-cell"><span class="day-number">7</span><span class="event">P-Tactical Adjustments (75 min)</span><span class="event event-meeting">TB: Player-Led Social Event</span></td>
+                                <td class="day-cell"><span class="day-number">8</span><span class="event">P-Special Teams Focus (75 min)</span><span class="event event-sc">S&C-Power/Speed</span></td>
+                                <td class="day-cell"><span class="day-number">9</span><span class="event">P-Game Prep (60 min)</span></td>
+                                <td class="day-cell"><span class="day-number">10</span><span class="event event-game">Game 11</span></td>
+                                <td class="day-cell weekend-day"><span class="day-number">11</span><span class="event">Travel</span><span class="event event-recovery">Rec</span></td>
+                            </tr>
+                            <tr>
+                                <td class="day-cell weekend-day"><span class="day-number">12</span><span class="event event-game">Game 12</span></td>
+                                <td class="day-cell"><span class="day-number">13</span><span class="event event-rest">Thanksgiving - Rest/Optional</span></td>
+                                <td class="day-cell"><span class="day-number">14</span><span class="event">P-Skills & Compete (75 min)</span><span class="event event-sc">S&C-Strength Maint.</span></td>
+                                <td class="day-cell"><span class="day-number">15</span><span class="event">P-Systems Review (75 min)</span><span class="event event-sc">S&C-Power/Speed</span></td>
+                                <td class="day-cell"><span class="day-number">16</span><span class="event">P-Game Prep (60 min)</span><span class="event event-meeting">TM: Mid-Season Goals Review</span></td>
+                                <td class="day-cell"><span class="day-number">17</span><span class="event event-game">Game 13</span></td>
+                                <td class="day-cell weekend-day"><span class="day-number">18</span><span class="event event-game">Game 14</span></td>
+                            </tr>
+                            <tr>
+                                <td class="day-cell weekend-day"><span class="day-number">19</span><span class="event event-rest">Rest</span></td>
+                                <td class="day-cell"><span class="day-number">20</span><span class="event">P-High Intensity Drills (75 min)</span><span class="event event-sc">S&C-Strength Maint.</span><span class="event event-meeting">Player Check-ins (PM)</span></td>
+                                <td class="day-cell"><span class="day-number">21</span><span class="event">P-Video & On-ice Adjust (75 min)</span></td>
+                                <td class="day-cell"><span class="day-number">22</span><span class="event">P-Special Teams (75 min)</span><span class="event event-sc">S&C-Power/Speed</span><span class="event event-meeting">TB: Role Clarity Exercises</span></td>
+                                <td class="day-cell"><span class="day-number">23</span><span class="event">P-Game Prep (60 min)</span></td>
+                                <td class="day-cell"><span class="day-number">24</span><span class="event event-game">Game 15</span></td>
+                                <td class="day-cell weekend-day"><span class="day-number">25</span><span class="event">Travel</span><span class="event event-recovery">Rec</span></td>
+                            </tr>
+                             <tr>
+                                <td class="day-cell weekend-day"><span class="day-number">26</span><span class="event event-game">Game 16</span></td>
+                                <td class="day-cell"><span class="day-number">27</span><span class="event event-recovery">Rec (Light)</span><span class="event event-video">Vid-Analysis</span><span class="event event-sc">S&C-Maint.</span></td>
+                                <td class="day-cell"><span class="day-number">28</span><span class="event">P-Skills Focus (75 min)</span></td>
+                                <td class="day-cell"><span class="day-number">29</span><span class="event">P-Tactics (75 min)</span><span class="event event-sc">S&C-Power</span></td>
+                                <td class="day-cell"><span class="day-number">30</span><span class="event">P-Game Prep (60 min)</span></td>
+                                <td class="day-cell"><span class="day-number">31</span><span class="event event-game">Game 17</span></td>
+                                <td></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>`,
+            "November": `
+                <div class="content-fade-in">
+                    <h2 class="month-title">November 2025: Mid-Season Grind</h2>
+                    <table class="calendar-table">
+                        <thead><tr><th>Sun</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th></tr></thead>
+                        <tbody>
+                            <tr><td></td><td></td><td></td><td></td><td></td><td></td>
+                                <td class="day-cell weekend-day"><span class="day-number">1</span><span class="event event-game">Game 18</span></td>
+                            </tr>
+                            <tr>
+                                <td class="day-cell weekend-day"><span class="day-number">2</span><span class="event event-rest">Rest</span></td>
+                                <td class="day-cell"><span class="day-number">3</span><span class="event">P-Compete Drills (75 min)</span><span class="event event-sc">S&C-Strength</span><span class="event event-video">Vid-Review</span></td>
+                                <td class="day-cell"><span class="day-number">4</span><span class="event">P-Systems Polish (75 min)</span></td>
+                                <td class="day-cell"><span class="day-number">5</span><span class="event">P-Special Teams (75 min)</span><span class="event event-sc">S&C-Power</span></td>
+                                <td class="day-cell"><span class="day-number">6</span><span class="event">P-Game Prep (60 min)</span><span class="event event-meeting">TB: Community Outreach</span></td>
+                                <td class="day-cell"><span class="day-number">7</span><span class="event event-game">Game 19</span></td>
+                                <td class="day-cell weekend-day"><span class="day-number">8</span><span class="event">Travel</span><span class="event event-recovery">Rec</span></td>
+                            </tr>
+                            <tr>
+                                <td class="day-cell weekend-day"><span class="day-number">9</span><span class="event event-game">Game 20</span></td>
+                                <td class="day-cell"><span class="day-number">10</span><span class="event event-recovery">Rec (Light)</span><span class="event event-sc">S&C-Strength</span><span class="event event-assess">Assess-RPE/Wellness</span></td>
+                                <td class="day-cell"><span class="day-number">11</span><span class="event">P-Skills Dev (75 min)</span><span class="event event-meeting">Remembrance Day Activity (TB)</span></td>
+                                <td class="day-cell"><span class="day-number">12</span><span class="event">P-Tactical Focus (75 min)</span><span class="event event-sc">S&C-Power</span></td>
+                                <td class="day-cell"><span class="day-number">13</span><span class="event">P-Game Prep (60 min)</span></td>
+                                <td class="day-cell"><span class="day-number">14</span><span class="event event-game">Game 21</span></td>
+                                <td class="day-cell weekend-day"><span class="day-number">15</span><span class="event event-game">Game 22</span></td>
+                            </tr>
+                            <tr>
+                                <td class="day-cell weekend-day"><span class="day-number">16</span><span class="event event-rest">Rest</span></td>
+                                <td class="day-cell"><span class="day-number">17</span><span class="event">P-Small Area Games (75 min)</span><span class="event event-sc">S&C-Strength</span><span class="event event-video">Vid-Analysis</span></td>
+                                <td class="day-cell"><span class="day-number">18</span><span class="event">P-Defensive Concepts (75 min)</span><span class="event event-meeting">Leadership Group Meeting (TB)</span></td>
+                                <td class="day-cell"><span class="day-number">19</span><span class="event">P-Offensive Concepts (75 min)</span><span class="event event-sc">S&C-Power</span></td>
+                                <td class="day-cell"><span class="day-number">20</span><span class="event">P-Game Prep (60 min)</span></td>
+                                <td class="day-cell"><span class="day-number">21</span><span class="event event-game">Game 23</span></td>
+                                <td class="day-cell weekend-day"><span class="day-number">22</span><span class="event">Travel</span><span class="event event-recovery">Rec</span></td>
+                            </tr>
+                            <tr>
+                                <td class="day-cell weekend-day"><span class="day-number">23</span><span class="event event-game">Game 24</span></td>
+                                <td class="day-cell"><span class="day-number">24</span><span class="event event-recovery">Rec (Active)</span><span class="event event-sc">S&C-Strength</span></td>
+                                <td class="day-cell"><span class="day-number">25</span><span class="event">P-Flow/Pace (75 min)</span></td>
+                                <td class="day-cell"><span class="day-number">26</span><span class="event">P-Special Teams (75 min)</span><span class="event event-sc">S&C-Power</span></td>
+                                <td class="day-cell"><span class="day-number">27</span><span class="event">P-Game Prep (60 min)</span></td>
+                                <td class="day-cell"><span class="day-number">28</span><span class="event event-game">Game 25</span></td>
+                                <td class="day-cell weekend-day"><span class="day-number">29</span><span class="event event-game">Game 26</span></td>
+                            </tr>
+                             <tr>
+                                <td class="day-cell weekend-day"><span class="day-number">30</span><span class="event event-rest">Rest</span></td>
+                                <td></td><td></td><td></td><td></td><td></td><td></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>`,
+            "December": `
+                <div class="content-fade-in">
+                    <h2 class="month-title">December 2025: Holiday Break Prep</h2>
+                     <table class="calendar-table">
+                        <thead><tr><th>Sun</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th></tr></thead>
+                        <tbody>
+                             <tr>
+                                <td></td>
+                                <td class="day-cell"><span class="day-number">1</span><span class="event">P-Skills & Compete (75 min)</span><span class="event event-sc">S&C-Strength</span><span class="event event-video">Vid-Review</span></td>
+                                <td class="day-cell"><span class="day-number">2</span><span class="event">P-Tactical Drills (75 min)</span></td>
+                                <td class="day-cell"><span class="day-number">3</span><span class="event">P-Special Teams (75 min)</span><span class="event event-sc">S&C-Power</span></td>
+                                <td class="day-cell"><span class="day-number">4</span><span class="event">P-Game Prep (60 min)</span></td>
+                                <td class="day-cell"><span class="day-number">5</span><span class="event event-game">Game 27</span></td>
+                                <td class="day-cell weekend-day"><span class="day-number">6</span><span class="event">Travel</span><span class="event event-recovery">Rec</span></td>
+                            </tr>
+                            <tr>
+                                <td class="day-cell weekend-day"><span class="day-number">7</span><span class="event event-game">Game 28</span></td>
+                                <td class="day-cell"><span class="day-number">8</span><span class="event event-recovery">Rec (Light - 30 min)</span><span class="event event-sc">S&C-Strength</span><span class="event event-meeting">Player Meetings (PM)</span></td>
+                                <td class="day-cell"><span class="day-number">9</span><span class="event">P-High Tempo Flow (75 min)</span></td>
+                                <td class="day-cell"><span class="day-number">10</span><span class="event">P-Battle Drills (75 min)</span><span class="event event-sc">S&C-Power</span></td>
+                                <td class="day-cell"><span class="day-number">11</span><span class="event">P-Game Prep (60 min)</span></td>
+                                <td class="day-cell"><span class="day-number">12</span><span class="event event-game">Game 29</span></td>
+                                <td class="day-cell weekend-day"><span class="day-number">13</span><span class="event event-game">Game 30</span></td>
+                            </tr>
+                            <tr>
+                                <td class="day-cell weekend-day"><span class="day-number">14</span><span class="event event-rest">Rest</span></td>
+                                <td class="day-cell"><span class="day-number">15</span><span class="event">P-Skills Focus (75 min)</span><span class="event event-sc">S&C-Strength</span><span class="event event-video">Vid-Mid-Season Review</span></td>
+                                <td class="day-cell"><span class="day-number">16</span><span class="event">P-Systems Review (75 min)</span><span class="event event-meeting">TB: Team Reflection (1st Half)</span></td>
+                                <td class="day-cell"><span class="day-number">17</span><span class="event">P-Fun Day / Scrimmage (60 min)</span><span class="event event-sc">S&C-Light Circuit</span></td>
+                                <td class="day-cell"><span class="day-number">18</span><span class="event">Travel Day / Optional Skate</span></td>
+                                <td class="day-cell"><span class="day-number">19</span><span class="event event-game">Game 31 (Pre-Break)</span></td>
+                                <td class="day-cell weekend-day"><span class="day-number">20</span><span class="event event-game">Game 32 (Pre-Break)</span><span class="event event-meeting">Team Holiday Gathering (TB)</span></td>
+                            </tr>
+                            <tr>
+                                <td class="day-cell weekend-day"><span class="day-number">21</span><span class="event event-rest">BREAK STARTS</span></td>
+                                <td class="day-cell"><span class="day-number">22</span><span class="event event-rest">Holiday Break</span></td>
+                                <td class="day-cell"><span class="day-number">23</span><span class="event event-rest">Holiday Break</span></td>
+                                <td class="day-cell"><span class="day-number">24</span><span class="event event-rest">Holiday Break</span></td>
+                                <td class="day-cell"><span class="day-number">25</span><span class="event event-rest">Christmas Day</span></td>
+                                <td class="day-cell"><span class="day-number">26</span><span class="event event-rest">Holiday Break</span></td>
+                                <td class="day-cell weekend-day"><span class="day-number">27</span><span class="event event-rest">Holiday Break / Travel</span></td>
+                            </tr>
+                             <tr>
+                                <td class="day-cell weekend-day"><span class="day-number">28</span><span class="event">Players Return / Rec Skate</span><span class="event event-assess">Wellness Check</span></td>
+                                <td class="day-cell"><span class="day-number">29</span><span class="event">P-Post Break Tune-up (75 min)</span><span class="event event-sc">S&C-Re-activation</span><span class="event event-meeting">TB: Re-Group & Goal Setting</span></td>
+                                <td class="day-cell"><span class="day-number">30</span><span class="event">P-Systems & Flow (75 min)</span></td>
+                                <td class="day-cell"><span class="day-number">31</span><span class="event">P-Light / Game Prep (45 min)</span></td>
+                                <td></td><td></td><td></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>`,
+            "January": `
+                <div class="content-fade-in">
+                    <h2 class="month-title">January 2026: Mid-Season Push</h2>
+                     <table class="calendar-table">
+                        <thead><tr><th>Sun</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th></tr></thead>
+                        <tbody>
+                            <tr><td></td><td></td><td></td><td></td>
+                                <td class="day-cell"><span class="day-number">1</span><span class="event event-rest">New Year's Day - Rest</span></td>
+                                <td class="day-cell"><span class="day-number">2</span><span class="event event-game">Game 33</span></td>
+                                <td class="day-cell weekend-day"><span class="day-number">3</span><span class="event event-game">Game 34</span></td>
+                            </tr>
+                            <tr>
+                                <td class="day-cell weekend-day"><span class="day-number">4</span><span class="event event-rest">Rest</span></td>
+                                <td class="day-cell"><span class="day-number">5</span><span class="event">P-Corrections (75 min)</span><span class="event event-sc">S&C-Strength</span><span class="event event-video">Vid-Weekend Review</span></td>
+                                <td class="day-cell"><span class="day-number">6</span><span class="event">P-Puck Possession (75 min)</span></td>
+                                <td class="day-cell"><span class="day-number">7</span><span class="event">P-Special Teams (75 min)</span><span class="event event-sc">S&C-Power</span><span class="event event-meeting">TM - Playoff Push Mindset</span></td>
+                                <td class="day-cell"><span class="day-number">8</span><span class="event">P-Game Prep (60 min)</span></td>
+                                <td class="day-cell"><span class="day-number">9</span><span class="event event-game">Game 35</span></td>
+                                <td class="day-cell weekend-day"><span class="day-number">10</span><span class="event">Travel</span><span class="event event-recovery">Rec</span></td>
+                            </tr>
+                            <tr>
+                                <td class="day-cell weekend-day"><span class="day-number">11</span><span class="event event-game">Game 36</span></td>
+                                <td class="day-cell"><span class="day-number">12</span><span class="event event-recovery">Rec (Light - 30 min)</span><span class="event event-sc">S&C-Strength</span><span class="event event-assess">Mid-Season Fitness Re-Check</span></td>
+                                <td class="day-cell"><span class="day-number">13</span><span class="event">P-Defensive Urgency (75 min)</span><span class="event event-meeting">TB: Peer Accountability Session</span></td>
+                                <td class="day-cell"><span class="day-number">14</span><span class="event">P-Offensive Creativity (75 min)</span><span class="event event-sc">S&C-Power</span></td>
+                                <td class="day-cell"><span class="day-number">15</span><span class="event">P-Game Prep (60 min)</span></td>
+                                <td class="day-cell"><span class="day-number">16</span><span class="event event-game">Game 37</span></td>
+                                <td class="day-cell weekend-day"><span class="day-number">17</span><span class="event event-game">Game 38</span></td>
+                            </tr>
+                            <tr>
+                                <td class="day-cell weekend-day"><span class="day-number">18</span><span class="event event-rest">Rest</span></td>
+                                <td class="day-cell"><span class="day-number">19</span><span class="event">P-Battle & Compete (75 min)</span><span class="event event-sc">S&C-Strength</span><span class="event event-video">Vid-Game Analysis</span></td>
+                                <td class="day-cell"><span class="day-number">20</span><span class="event">P-Systems Refinement (75 min)</span></td>
+                                <td class="day-cell"><span class="day-number">21</span><span class="event">P-Special Teams (75 min)</span><span class="event event-sc">S&C-Power</span></td>
+                                <td class="day-cell"><span class="day-number">22</span><span class="event">P-Game Prep (60 min)</span></td>
+                                <td class="day-cell"><span class="day-number">23</span><span class="event event-game">Game 39</span></td>
+                                <td class="day-cell weekend-day"><span class="day-number">24</span><span class="event">Travel</span><span class="event event-recovery">Rec</span></td>
+                            </tr>
+                             <tr>
+                                <td class="day-cell weekend-day"><span class="day-number">25</span><span class="event event-game">Game 40</span></td>
+                                <td class="day-cell"><span class="day-number">26</span><span class="event event-recovery">Rec (Active)</span><span class="event event-sc">S&C-Strength</span></td>
+                                <td class="day-cell"><span class="day-number">27</span><span class="event">P-Small Games (75 min)</span></td>
+                                <td class="day-cell"><span class="day-number">28</span><span class="event">P-Situational Play (75 min)</span><span class="event event-sc">S&C-Speed</span></td>
+                                <td class="day-cell"><span class="day-number">29</span><span class="event">P-Game Prep (60 min)</span></td>
+                                <td class="day-cell"><span class="day-number">30</span><span class="event event-game">Game 41</span></td>
+                                <td class="day-cell weekend-day"><span class="day-number">31</span><span class="event event-game">Game 42</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>`,
+            "February": `
+                <div class="content-fade-in">
+                    <h2 class="month-title">February 2026: Late Season & Peaking</h2>
+                    <table class="calendar-table">
+                        <thead><tr><th>Sun</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th></tr></thead>
+                        <tbody>
+                            <tr>
+                                <td class="day-cell weekend-day"><span class="day-number">1</span><span class="event event-rest">Rest</span></td>
+                                <td class="day-cell"><span class="day-number">2</span><span class="event">P-Skills Polish (60 min)</span><span class="event event-sc">S&C-Maint. (Reduced Vol)</span><span class="event event-video">Vid-Opponent Scout</span></td>
+                                <td class="day-cell"><span class="day-number">3</span><span class="event">P-Tactical Tune-up (60 min)</span></td>
+                                <td class="day-cell"><span class="day-number">4</span><span class="event">P-Special Teams (60 min)</span><span class="event event-sc">S&C-Speed/Activation</span></td>
+                                <td class="day-cell"><span class="day-number">5</span><span class="event">P-Game Prep (Light - 45 min)</span></td>
+                                <td class="day-cell"><span class="day-number">6</span><span class="event event-game">Game 43</span></td>
+                                <td class="day-cell weekend-day"><span class="day-number">7</span><span class="event">Travel</span><span class="event event-recovery">Rec</span></td>
+                            </tr>
+                            <tr>
+                                <td class="day-cell weekend-day"><span class="day-number">8</span><span class="event event-game">Game 44</span></td>
+                                <td class="day-cell"><span class="day-number">9</span><span class="event event-recovery">Rec (Very Light - 30 min)</span><span class="event event-sc">S&C-Maint.</span><span class="event event-meeting">TM: Playoff Mentality</span></td>
+                                <td class="day-cell"><span class="day-number">10</span><span class="event">P-High Intensity Bursts (60 min)</span><span class="event event-meeting">TB: High-Stakes Simulation</span></td>
+                                <td class="day-cell"><span class="day-number">11</span><span class="event">P-Game Flow Drills (60 min)</span><span class="event event-sc">S&C-Speed/Activation</span></td>
+                                <td class="day-cell"><span class="day-number">12</span><span class="event">P-Game Prep (45 min)</span></td>
+                                <td class="day-cell"><span class="day-number">13</span><span class="event event-game">Game 45</span></td>
+                                <td class="day-cell weekend-day"><span class="day-number">14</span><span class="event event-game">Game 46</span></td>
+                            </tr>
+                            <tr>
+                                <td class="day-cell weekend-day"><span class="day-number">15</span><span class="event event-rest">Rest</span></td>
+                                <td class="day-cell"><span class="day-number">16</span><span class="event">P-Skills & Fun Compete (60 min)</span><span class="event event-sc">S&C-Maint.</span><span class="event event-video">Vid-Self Scout</span></td>
+                                <td class="day-cell"><span class="day-number">17</span><span class="event">P-Systems Review (Sharp - 60 min)</span></td>
+                                <td class="day-cell"><span class="day-number">18</span><span class="event">P-Special Teams Polish (60 min)</span><span class="event event-sc">S&C-Activation</span><span class="event event-meeting">TB: Visualization Prep</span></td>
+                                <td class="day-cell"><span class="day-number">19</span><span class="event">P-Game Prep (45 min)</span></td>
+                                <td class="day-cell"><span class="day-number">20</span><span class="event event-game">Game 47</span></td>
+                                <td class="day-cell weekend-day"><span class="day-number">21</span><span class="event">Travel</span><span class="event event-recovery">Rec</span></td>
+                            </tr>
+                            <tr>
+                                <td class="day-cell weekend-day"><span class="day-number">22</span><span class="event event-game">Game 48 (Final Push)</span></td>
+                                <td class="day-cell"><span class="day-number">23</span><span class="event event-recovery">Rec (Active)</span><span class="event event-sc">S&C-Maint.</span><span class="event event-assess">Assess-Playoff Readiness</span></td>
+                                <td class="day-cell"><span class="day-number">24</span><span class="event">P-Playoff Scenarios (60 min)</span></td>
+                                <td class="day-cell"><span class="day-number">25</span><span class="event">P-Intensity & Execution (60 min)</span><span class="event event-sc">S&C-Activation</span></td>
+                                <td class="day-cell"><span class="day-number">26</span><span class="event">P-Game Prep (45 min)</span></td>
+                                <td class="day-cell"><span class="day-number">27</span><span class="event event-game">Game 49</span></td>
+                                <td class="day-cell weekend-day"><span class="day-number">28</span><span class="event event-game">Game 50 (Final Reg. Season?)</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>`,
+            "March": `
+                <div class="content-fade-in">
+                    <h2 class="month-title">March 2026: Playoffs / End of Season</h2>
+                    <table class="calendar-table">
+                        <thead><tr><th>Sun</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th></tr></thead>
+                        <tbody>
+                            <tr>
+                                <td class="day-cell weekend-day"><span class="day-number">1</span><span class="event event-rest">Rest / Mental Prep</span></td>
+                                <td class="day-cell"><span class="day-number">2</span><span class="event">P-Playoff Intensity (75 min)</span><span class="event event-sc">S&C-Activation/Speed</span><span class="event event-video">Vid-Opponent Deep Dive</span></td>
+                                <td class="day-cell"><span class="day-number">3</span><span class="event">P-Systems Polish (60 min)</span><span class="event event-meeting">TB: Playoff Team Unity</span></td>
+                                <td class="day-cell"><span class="day-number">4</span><span class="event">P-Special Teams Focus (60 min)</span><span class="event event-sc">S&C-Activation</span></td>
+                                <td class="day-cell"><span class="day-number">5</span><span class="event">P-Game Prep (Light - 45 min)</span></td>
+                                <td class="day-cell"><span class="day-number">6</span><span class="event event-game">Playoff Game 1</span></td>
+                                <td class="day-cell weekend-day"><span class="day-number">7</span><span class="event event-game">Playoff Game 2</span></td>
+                            </tr>
+                            <tr>
+                                <td class="day-cell weekend-day"><span class="day-number">8</span><span class="event">Travel</span><span class="event event-recovery">Rec</span></td>
+                                <td class="day-cell"><span class="day-number">9</span><span class="event">P-Adjustments (60 min)</span><span class="event event-sc">S&C-Rec/Maint.</span><span class="event event-video">Vid-Series Analysis</span></td>
+                                <td class="day-cell"><span class="day-number">10</span><span class="event">P-Game Prep (45-60 min)</span></td>
+                                <td class="day-cell"><span class="day-number">11</span><span class="event event-game">Playoff Game 3</span></td>
+                                <td class="day-cell"><span class="day-number">12</span><span class="event event-recovery">Rec/Travel</span><span class="event">(If nec: P-Prep)</span></td>
+                                <td class="day-cell"><span class="day-number">13</span><span class="event event-game">(If nec.) G4</span></td>
+                                <td class="day-cell weekend-day"><span class="day-number">14</span><span class="event event-recovery">Rec/Travel</span></td>
+                            </tr>
+                            <tr>
+                                <td class="day-cell weekend-day"><span class="day-number">15</span><span class="event event-game">(If nec.) G5</span></td>
+                                <td class="day-cell"><span class="day-number">16</span><span class="event">Contingent: Rec/Prep</span><span class="event event-meeting">Exit Mtg Prep (If out)</span></td>
+                                <td class="day-cell"><span class="day-number">17</span><span class="event">Contingent</span></td>
+                                <td class="day-cell"><span class="day-number">18</span><span class="event">Contingent</span></td>
+                                <td class="day-cell"><span class="day-number">19</span><span class="event">Contingent</span></td>
+                                <td class="day-cell"><span class="day-number">20</span><span class="event event-assess">Player Exit Interviews</span></td>
+                                <td class="day-cell weekend-day"><span class="day-number">21</span><span class="event event-assess">Player Exit Interviews</span><span class="event event-meeting">TB: Season Celebration</span></td>
+                            </tr>
+                            <tr>
+                                <td class="day-cell weekend-day"><span class="day-number">22</span><span class="event event-assess">Player Exit Interviews</span></td>
+                                <td class="day-cell"><span class="day-number">23</span><span class="event">Equipment Return</span><span class="event event-meeting">Final Team Meeting</span></td>
+                                <td class="day-cell"><span class="day-number">24</span><span class="event">Off-Season Program Dist.</span></td>
+                                <td class="day-cell"><span class="day-number">25</span><span class="event event-meeting">Staff Debrief</span></td>
+                                <td class="day-cell"><span class="day-number">26</span><span class="event event-meeting">Staff Planning</span></td>
+                                <td class="day-cell"><span class="day-number">27</span><span class="event event-meeting">Staff Planning</span></td>
+                                <td class="day-cell weekend-day"><span class="day-number">28</span><span class="event">Admin</span></td>
+                            </tr>
+                            <tr>
+                                <td class="day-cell weekend-day"><span class="day-number">29</span><span class="event">Admin</span></td>
+                                <td class="day-cell"><span class="day-number">30</span><span class="event">Admin</span></td>
+                                <td class="day-cell"><span class="day-number">31</span><span class="event">End of Activities</span></td>
+                                <td></td><td></td><td></td><td></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>`
+        };
+
+
+        // --- DOM ELEMENT REFERENCES ---
+        const monthNavContainer = document.getElementById('month-navigation');
+        const planContainer = document.getElementById('performance-plan-content');
+        const calendarContainer = document.getElementById('calendar-container');
+        
+        // --- CORE LOGIC ---
+        const months = ["September", "October", "November", "December", "January", "February", "March"];
+        
+        function updateContent(monthName) {
+            // Update performance plan content (left column)
+            planContainer.innerHTML = performanceData[monthName];
+
+            // Update detailed calendar view (right column)
+            calendarContainer.innerHTML = calendarData[monthName];
+
+            // Update active button style
+            document.querySelectorAll('.month-btn').forEach(btn => {
+                btn.classList.remove('active-month-btn');
+                if (btn.dataset.month === monthName) {
+                    btn.classList.add('active-month-btn');
+                }
+            });
+        }
+
+        // --- INITIALIZATION ---
+        // Create navigation buttons
+        months.forEach(monthName => {
+            const button = document.createElement('button');
+            button.textContent = monthName;
+            button.dataset.month = monthName;
+            button.className = 'month-btn px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200 ease-in-out bg-white text-[#0A2463] border border-slate-300 hover:bg-[#3E8E7E] hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#3E8E7E]';
+            button.addEventListener('click', () => updateContent(monthName));
+            monthNavContainer.appendChild(button);
+        });
+        
+        // Set current year in the footer
+        document.getElementById('currentYear').textContent = new Date().getFullYear();
+
+        // Load content for the initial month (September)
+        updateContent("September");
+
+        // --- TABS AND CHART JS FUNCTIONALITY ---
+        
+        // Tab Functionality
+        const tabButtons = document.querySelectorAll('.tab-button');
+        const tabPanes = document.querySelectorAll('.tab-pane');
+
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const tabId = button.dataset.tab;
+
+                tabButtons.forEach(btn => {
+                    btn.classList.remove('active-tab');
+                    btn.setAttribute('aria-selected', 'false');
+                });
+                button.classList.add('active-tab');
+                button.setAttribute('aria-selected', 'true');
+
+                tabPanes.forEach(pane => {
+                    if (pane.id === `${tabId}-content`) {
+                        pane.classList.remove('hidden');
+                    } else {
+                        pane.classList.add('hidden');
+                    }
+                });
+            });
+        });
+
+        // Chart.js Radar Chart
+        const ctx = document.getElementById('progressRadarChart');
+        if (ctx) {
+            const radarChartData = {
+                labels: ['Skating', 'Puck Skills', 'Shooting', 'Tactical', 'Compete', 'Coachability'],
+                datasets: [{
+                    label: 'Player A',
+                    data: [8, 7, 9, 7, 8, 9],
+                    fill: true,
+                    backgroundColor: 'rgba(62, 142, 126, 0.2)',
+                    borderColor: '#3E8E7E',
+                    pointBackgroundColor: '#3E8E7E',
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: '#3E8E7E'
+                }, {
+                    label: 'Player B',
+                    data: [6, 8, 7, 9, 6, 8],
+                    fill: true,
+                    backgroundColor: 'rgba(244, 162, 97, 0.2)',
+                    borderColor: '#F4A261',
+                    pointBackgroundColor: '#F4A261',
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: '#F4A261',
+                    hidden: true
+                }, {
+                    label: 'Team Average',
+                    data: [7, 6, 7, 6, 7, 7],
+                    fill: true,
+                    backgroundColor: 'rgba(10, 36, 99, 0.2)',
+                    borderColor: '#0A2463',
+                    pointBackgroundColor: '#0A2463',
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: '#0A2463',
+                    hidden: true
+                }]
+            };
+
+            const myRadarChart = new Chart(ctx, {
+                type: 'radar',
+                data: radarChartData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    elements: { line: { borderWidth: 2 } },
+                    scales: {
+                        r: {
+                            angleLines: { display: true },
+                            suggestedMin: 0,
+                            suggestedMax: 10,
+                            pointLabels: { font: { size: 10 }, color: '#0A2463' },
+                            ticks: { stepSize: 2, backdropColor: 'rgba(255, 255, 255, 0.75)' }
+                        }
+                    },
+                    plugins: {
+                        legend: { position: 'top', labels: { color: '#0A2463' } }
+                    }
+                }
+            });
+
+            const playerSelect = document.getElementById('player-select');
+            if (playerSelect) {
+                playerSelect.addEventListener('change', (event) => {
+                    const selectedValue = event.target.value;
+                    myRadarChart.data.datasets.forEach(dataset => {
+                        if (selectedValue === 'playerA' && dataset.label === 'Player A') dataset.hidden = false;
+                        else if (selectedValue === 'playerB' && dataset.label === 'Player B') dataset.hidden = false;
+                        else if (selectedValue === 'teamAverage' && dataset.label === 'Team Average') dataset.hidden = false;
+                        else dataset.hidden = true;
+                    });
+                    myRadarChart.update();
+                });
+                // Trigger change to show the default 'Player A'
+                playerSelect.dispatchEvent(new Event('change'));
+            }
+        }
+    });
+    </script>
+</body>
+</html>
