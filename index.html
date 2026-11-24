@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Interactive Hockey Yearly Plan & Calendar</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -194,41 +193,6 @@
                             <h3 class="text-lg font-semibold text-[#0A2463] mb-2">LTPD Alignment</h3>
                             <p class="text-sm">Ensure all training, competition, and recovery demands are appropriate for the athletes' developmental stage according to Hockey Canada's Long-Term Player Development model. This promotes holistic development and reduces burnout.</p>
                         </div>
-                    </div>
-                </div>
-            </section>
-
-            <section id="progress" class="pt-12 mb-12">
-                <h2 class="text-3xl font-bold text-[#0A2463] mb-8 text-center">Progress Tracking (Sample)</h2>
-                <div class="bg-white p-6 rounded-xl shadow-lg border border-slate-200">
-                    <div class="mb-6">
-                        <label for="player-select" class="block text-sm font-medium text-[#0A2463] mb-1">Select Player/View:</label>
-                        <select id="player-select" class="block w-full max-w-xs p-2 border border-slate-300 rounded-md shadow-sm focus:ring-[#3E8E7E] focus:border-[#3E8E7E] sm:text-sm">
-                            <option value="playerA">Player A</option>
-                            <option value="playerB">Player B</option>
-                            <option value="teamAverage">Team Average</option>
-                        </select>
-                    </div>
-                    <div class="chart-container relative w-full max-w-xl mx-auto h-80 sm:h-96">
-                        <canvas id="progressRadarChart"></canvas>
-                    </div>
-                </div>
-                <div class="mt-8 grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                    <div class="bg-white p-6 rounded-xl shadow-lg border border-slate-200">
-                        <h3 class="text-lg font-semibold text-[#0A2463] mb-2">Skill Development</h3>
-                        <p class="text-sm">Tracking improvements in core technical skills (skating, puck handling, shooting, passing) through targeted drills and game application.</p>
-                    </div>
-                    <div class="bg-white p-6 rounded-xl shadow-lg border border-slate-200">
-                        <h3 class="text-lg font-semibold text-[#0A2463] mb-2">Physical Conditioning</h3>
-                        <p class="text-sm">Monitoring strength, speed, agility, and endurance gains based on S&C program adherence and on-ice performance metrics.</p>
-                    </div>
-                    <div class="bg-white p-6 rounded-xl shadow-lg border border-slate-200">
-                        <h3 class="text-lg font-semibold text-[#0A2463] mb-2">Tactical Understanding</h3>
-                        <p class="text-sm">Assessing growth in game sense, positional play, system comprehension, and decision-making in various game situations.</p>
-                    </div>
-                    <div class="bg-white p-6 rounded-xl shadow-lg border border-slate-200">
-                        <h3 class="text-lg font-semibold text-[#0A2463] mb-2">Mental Fortitude</h3>
-                        <p class="text-sm">Observing development in focus, resilience, coachability, leadership, and overall contribution to team culture and performance.</p>
                     </div>
                 </div>
             </section>
@@ -842,85 +806,6 @@
                 });
             });
         });
-
-        // Chart.js Radar Chart
-        const ctx = document.getElementById('progressRadarChart');
-        if (ctx) {
-            const radarChartData = {
-                labels: ['Skating', 'Puck Skills', 'Shooting', 'Tactical', 'Compete', 'Coachability'],
-                datasets: [{
-                    label: 'Player A',
-                    data: [8, 7, 9, 7, 8, 9],
-                    fill: true,
-                    backgroundColor: 'rgba(62, 142, 126, 0.2)',
-                    borderColor: '#3E8E7E',
-                    pointBackgroundColor: '#3E8E7E',
-                    pointBorderColor: '#fff',
-                    pointHoverBackgroundColor: '#fff',
-                    pointHoverBorderColor: '#3E8E7E'
-                }, {
-                    label: 'Player B',
-                    data: [6, 8, 7, 9, 6, 8],
-                    fill: true,
-                    backgroundColor: 'rgba(244, 162, 97, 0.2)',
-                    borderColor: '#F4A261',
-                    pointBackgroundColor: '#F4A261',
-                    pointBorderColor: '#fff',
-                    pointHoverBackgroundColor: '#fff',
-                    pointHoverBorderColor: '#F4A261',
-                    hidden: true
-                }, {
-                    label: 'Team Average',
-                    data: [7, 6, 7, 6, 7, 7],
-                    fill: true,
-                    backgroundColor: 'rgba(10, 36, 99, 0.2)',
-                    borderColor: '#0A2463',
-                    pointBackgroundColor: '#0A2463',
-                    pointBorderColor: '#fff',
-                    pointHoverBackgroundColor: '#fff',
-                    pointHoverBorderColor: '#0A2463',
-                    hidden: true
-                }]
-            };
-
-            const myRadarChart = new Chart(ctx, {
-                type: 'radar',
-                data: radarChartData,
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    elements: { line: { borderWidth: 2 } },
-                    scales: {
-                        r: {
-                            angleLines: { display: true },
-                            suggestedMin: 0,
-                            suggestedMax: 10,
-                            pointLabels: { font: { size: 10 }, color: '#0A2463' },
-                            ticks: { stepSize: 2, backdropColor: 'rgba(255, 255, 255, 0.75)' }
-                        }
-                    },
-                    plugins: {
-                        legend: { position: 'top', labels: { color: '#0A2463' } }
-                    }
-                }
-            });
-
-            const playerSelect = document.getElementById('player-select');
-            if (playerSelect) {
-                playerSelect.addEventListener('change', (event) => {
-                    const selectedValue = event.target.value;
-                    myRadarChart.data.datasets.forEach(dataset => {
-                        if (selectedValue === 'playerA' && dataset.label === 'Player A') dataset.hidden = false;
-                        else if (selectedValue === 'playerB' && dataset.label === 'Player B') dataset.hidden = false;
-                        else if (selectedValue === 'teamAverage' && dataset.label === 'Team Average') dataset.hidden = false;
-                        else dataset.hidden = true;
-                    });
-                    myRadarChart.update();
-                });
-                // Trigger change to show the default 'Player A'
-                playerSelect.dispatchEvent(new Event('change'));
-            }
-        }
     });
     </script>
 </body>
